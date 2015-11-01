@@ -24,9 +24,10 @@ source = os.environ.get('PYOTSDB_HOSTNAME')
 if not source:
     exit("Please : export PYOTSDB_HOSTNAME=$(hostname -s)")
 
-period = int(os.environ.get('PYOTSDB_PERIOD'))
-if not period:
-    exit("Please : export PYOTSDB_PERIOD=YY")
+delta = os.environ.get('PYOTSDB_DELTA')
+if not delta:
+    exit("Please : export PYOTSDB_DELTA=XX")
+delta = int(delta)*60*60
 
 
 
@@ -34,22 +35,18 @@ from PyOTSDB import PyOTSDB
 con = PyOTSDB(endpoint=end_point, username=token_id, password=token_key)
 
 
-while True:
-    timer = int(time.time())
-    print("sending indoor t°")
-    con.put(metric_name='home.temp.indoor',
-            timestamp=timer,
-            value=random.randrange(20, 25),
-            tags = {
-                'source': source,
-            })
+startpoint = int(time.time())-delta
 
-    print("sending outdoor t°")
-    con.put(metric_name='home.temp.outdoor',
-            timestamp=timer,
-            value=random.randrange(10, 16),
-            tags = {
-                'source': source,
-            })
-    print("waiting %d seconds..." % period)
-    time.sleep(period)
+
+print("Getting the count of points since 24h for indoor t°")
+res = con.get(start=startpoint,
+              queries = [{
+                  "metric": "home.temp.indoor",
+                  "aggregator": "sum",
+                  #"tags": {
+                  #    "source": source
+                  #}
+              }]
+      )
+
+print(res)
