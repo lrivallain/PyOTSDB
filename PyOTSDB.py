@@ -11,24 +11,25 @@ class PyOTSDB:
 
     # general request through http
     def _http_request(self, data):
-        #try:
+        try:
+            print(self.endpoint)
             # request & fetch response
-            #response = requests.post(self.endpoint, data=json.dumps(data),
-            #                         auth=(self.username, self.password))
+            response = requests.post(self.endpoint,
+                                     data=json.dumps(data),
+                                     auth=(self.username, self.password))
 
-            response = requests.post("https://eeaaaiayr5ra5:ii2abAw1tRa8rTtZD8zrEF2r@opentsdb.iot.runabove.io/api/query", data=json.dumps(data))
             # raise error ?
-            #response.raise_for_status()
+            response.raise_for_status()
 
             # print the http response code on success
-            print('Send successful\nResponse code from server: {}'.
+            print('Response code from server: {}'.
                   format(response.status_code))
             return response.content
 
-        #except requests.exceptions.HTTPError as e:
-        #    print('HTTP code is {} and reason is {}'.format(e.response.status_code,
-        #                                                    e.response.reason))
-    
+        except requests.exceptions.HTTPError as e:
+            print('HTTP code is {} and reason is {}'.format(e.response.status_code,
+                                                            e.response.reason))
+
     # push data through http
     def _http_put(self, metric_name, timestamp, value, tags):
         data = {
@@ -37,18 +38,28 @@ class PyOTSDB:
             'value': value,
             'tags': tags,
         }
-
         self._http_request(data)
 
 
     # get data through http
-    def _http_get(self, start, end, queries):
+    def _http_get(self, start, queries, end=None):
         data = {
             'start': start,
+            'end': end,
             'queries' : queries
         }
         print(json.dumps(data))
         return self._http_request(data)
+
+
+    # push data through telnet
+    def _telnet_put(self, metric_name, timestamp, value, tags):
+        pass # not yet available
+
+
+    # get data through telnet
+    def _telnet_get(self, start, end, queries):
+        pass #not yet available
 
 
     # push data
@@ -56,7 +67,7 @@ class PyOTSDB:
         if self.endpoint.startswith("http"):
             return self._http_put(metric_name, timestamp, value, tags)
         else:
-            psss #not yet available
+            return self._telnet_put(metric_name, timestamp, value, tags)
 
 
     # get data
@@ -64,4 +75,4 @@ class PyOTSDB:
         if self.endpoint.startswith("http"):
             return self._http_get(start, end, queries)
         else:
-            psss #not yet available
+            return self._telnet_get(start, end, queries)

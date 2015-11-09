@@ -29,10 +29,9 @@ if not period:
     exit("Please : export PYOTSDB_PERIOD=YY")
 
 
-
+# init pyotsb worker
 from PyOTSDB import PyOTSDB
 con = PyOTSDB(endpoint=end_point, username=token_id, password=token_key)
-
 
 while True:
     timer = int(time.time())
