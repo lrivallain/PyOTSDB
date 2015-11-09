@@ -39,20 +39,22 @@ print("Getting the count of points since %sh for indoor t°" % os.environ.get('P
 res = con.get(start=int(time.time())-delta,
               queries = [{
                   "metric": "home.temp.indoor",
-                  "aggregator": "count",
+                  "aggregator": "avg",
                   "tags": {
                       "source": os.uname()[1].split('.')[0]
                   }
               }]
       )
+print res
 data = json.loads(res)
 
-print res
-
 # parsing results
-print("%d items found in last %sh" % (len(data[0]['dps']), os.environ.get('PYOTSDB_DELTA')))
+if len(data) > 0:
+    print("%d items found in last %sh" % (len(data[0]['dps']), os.environ.get('PYOTSDB_DELTA')))
 
-sum = 0
-for x in data[0]['dps']:
-    sum += data[0]['dps'][x]
-print("Average t° during this period is: %.2f°C" % (1.0*sum/len(data[0]['dps'])))
+    sum = 0
+    for x in data[0]['dps']:
+        sum += data[0]['dps'][x]
+    print("Average t° during this period is: %.2f°C" % (1.0*sum/len(data[0]['dps'])))
+else:
+    print("No result for this request")

@@ -21,14 +21,14 @@ class PyOTSDB:
             # raise error ?
             response.raise_for_status()
 
-            # print the http response code on success
-            print('Response code from server: {}'.
-                  format(response.status_code))
+            # return the body of response
             return response.content
 
         except requests.exceptions.HTTPError as e:
-            print('HTTP code is {} and reason is {}'.format(e.response.status_code,
-                                                            e.response.reason))
+            # in case of error print HTTP code and return nothing
+            print('HTTP code is %d' % e.response.status_code)
+            return "[]"
+
 
     # push data through http
     def _http_put(self, metric_name, timestamp, value, tags):
@@ -42,10 +42,9 @@ class PyOTSDB:
 
 
     # get data through http
-    def _http_get(self, start, queries, end=None):
+    def _http_get(self, start, queries):
         data = {
             'start': start,
-            'end': end,
             'queries' : queries
         }
         print(json.dumps(data))
@@ -71,8 +70,8 @@ class PyOTSDB:
 
 
     # get data
-    def get(self, start, end=None, queries=[]):
+    def get(self, start, queries=[]):
         if self.endpoint.startswith("http"):
-            return self._http_get(start, end, queries)
+            return self._http_get(start, queries)
         else:
-            return self._telnet_get(start, end, queries)
+            return self._telnet_get(start, queries)
